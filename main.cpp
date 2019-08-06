@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 
     if (argc == 2)
     {
-        Dict<QString, 1> dict("", "*END*");
+        Dict<QString, 2> dict("", "*END*");
         QFile inputFile(argv[1]);
         if (inputFile.open(QIODevice::ReadOnly))
         {
@@ -24,16 +24,30 @@ int main(int argc, char *argv[])
               QList<QString> data(line.split(" ", QString::SkipEmptyParts));
               dict.AddData(data);
            }
-
-           QString currentToken = dict.GetFirstToken();
-           QStringList tokenList {currentToken};
-           while (currentToken != "*END*")
-           {
-               currentToken = dict.GetNextToken(currentToken);
-               tokenList.append(currentToken);
-           }
-           qInfo() << tokenList.join(" ");
            inputFile.close();
+
+           int windowSize = 2;
+           for (int i = 0; i < 10; i++)
+           {
+               QString currentToken = dict.GetFirstToken();
+               QStringList tokenList {currentToken};
+               while (currentToken != "*END*")
+               {
+                   QList<QString> windowed;
+                   if (tokenList.length() <= 2)
+                   {
+                       windowed = tokenList;
+                   }
+                   else
+                   {
+                       windowed = tokenList.mid(tokenList.length() - windowSize, tokenList.length() - windowSize + 1);
+                   }
+
+                   currentToken = dict.GetNextToken(windowed);
+                   tokenList.append(currentToken);
+               }
+               qInfo() << tokenList.join(" ");
+           }
         }
     }
     exit(0);
