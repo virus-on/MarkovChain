@@ -72,10 +72,10 @@ public:
         {
             totalIdxCount += it.value();
 
-            if ((it + 1) == multiLvlDataMap_[windowSize - 2][currentTokenList].end())
+            if (idx < totalIdxCount || (it + 1) == multiLvlDataMap_[windowSize - 2][currentTokenList].end())
+            {
                 return it.key();
-            else if (idx < totalIdxCount)
-                return it.key();
+            }
         }
     }
 
@@ -130,7 +130,7 @@ public:
         if (maxWindowSize > 1)
         {
             // Get all keys from lvl1 dict
-            QList<T> FirstLvlKeys = firstLvlDataMap_.keys();
+            const QList<T>& FirstLvlKeys = firstLvlDataMap_.keys();
 
             // if we have no lvl2 dict data - add it
             if (multiLvlDataMap_.length() == 0)
@@ -189,95 +189,74 @@ public:
                     }
                 }
             }
-//            qDebug() << "Data:" << inputData;
-//            for (const auto& key: multiLvlDataMap_[0].keys())
-//            {
-//                qDebug() << "chain:" << multiLvlDataRefMap_[0][key] << "Values:" << multiLvlDataMap_[0][key] << "Hash:" << key;
-//            }
-//            qDebug() << "All ref map" << multiLvlDataRefMap_[0];
-//            qDebug() << "All data map" << multiLvlDataMap_[0];
-
-//            qDebug() << "\n\n";
         }
 
         // Dict gen for all windows greater then lvl2
-//        for (int windowSize = 3; windowSize < maxWindowSize; windowSize++)
-//        {
-//            const QList<T>& keyList = multiLvlDataRefMap_[windowSize - 3].keys();
-//            if (multiLvlDataRefMap_.length() < windowSize - 2)
-//            {
-//                QMap<QString, QList<T>> dataRefMap;
-//                QMap<QString, QMap<T, uint>> dataMap;
-//                multiLvlDataRefMap_.append(dataRefMap);
-//                multiLvlDataMap_.append(dataMap);
-//            }
+        for (int windowSize = 3; windowSize <= maxWindowSize; windowSize++)
+        {
+            const QList<QList<T>>& keyList = multiLvlDataMap_[windowSize - 3].keys();
+            if (multiLvlDataMap_.length() <= windowSize - 2)
+            {
+                QMap<QList<T>, QMap<T, uint>> dataMap;
+                multiLvlDataMap_.append(dataMap);
+            }
 
-//            // use existing dict data by reference
-//            QMap<QString, QList<T>>& dataRefMapRef = multiLvlDataRefMap_[windowSize - 2];
-//            QMap<QString, QMap<T, uint>>& dataMapRef = multiLvlDataMap_[windowSize - 2];
+            // use existing dict data by reference
+            QMap<QList<T>, QMap<T, uint>>& dataMapRef = multiLvlDataMap_[windowSize - 2];
+            for (const auto& key: keyList)
+            {
+                QList<T> allPossiableExtensions = multiLvlDataMap_[windowSize - 3][key].keys();
+                for (const auto& extension: allPossiableExtensions)
+                {
+                    if (extension == endToken_)
+                        continue;
+                    QList<T> newTokenDataCortege = key;
+                    newTokenDataCortege.append(extension);
 
-//            for (const auto& key: keyList)
-//            {
-//                QList<T> allPossiableExtensions = multiLvlDataMap_[windowSize - 3][key].keys();
-//                for (const auto& extension: allPossiableExtensions)
-//                {
-//                    QList<T> newTokenDataCortege = multiLvlDataRefMap_[windowSize - 3][key];
-//                    newTokenDataCortege.append(extension);
+                    // go across all data and search for a new tokens to add to lvl2 dict
+                    for (auto iter = inputData.begin(); iter != inputData.end(); iter++)
+                    {
+                        auto testDataChains = [windowSize, &newTokenDataCortege](auto itID)
+                        {
+                            for (int i = 0; i < newTokenDataCortege.length(); i++)
+                            {
+                                if (newTokenDataCortege[i] != *(itID + i))
+                                    return false;
+                            }
+                            return true;
+                        };
 
-//                    QString dataRefMapRecordId = GetMd5Hash(newTokenDataCortege);
-//                    if (not dataRefMapRef.contains(dataRefMapRecordId))
-//                        dataRefMapRef.insert(dataRefMapRecordId, newTokenDataCortege);
-//                    // go across all data and search for a new tokens to add to lvl2 dict
-//                    for (auto iter = inputData.begin(); iter != inputData.end(); iter++)
-//                    {
-//                        auto testDataChains = [windowSize, &newTokenDataCortege](auto& itID)
-//                        {
-//                            for (int i = 0; i < windowSize; i++)
-//                            {
-//                                if (newTokenDataCortege[i] != *(itID + i))
-//                                    return false;
-//                                return true;
-//                            }
-//                        };
+                        if ((iter + (windowSize - 1)) == inputData.end()) // no more data
+                            break;
+                        if (testDataChains(iter)) // GOTCHA!
+                        {
+                            T nextToken;
+                            if ((iter + windowSize) == inputData.end()) // End of tokens reached
+                                nextToken = endToken_;
+                            else                                        // Or we have real token?
+                                nextToken = *(iter + windowSize);
 
-//                        if ((iter + (windowSize - 1)) == inputData.end()) // no more data
-//                            break;
-//                        if (testDataChains(iter)) // GOTCHA!
-//                        {
-//                            T nextToken;
-//                            if ((iter + windowSize) == inputData.end()) // End of tokens reached
-//                                nextToken = endToken_;
-//                            else                                        // Or we have real token?
-//                                nextToken = *(iter + windowSize);
-
-//                            if (dataMapRef.contains(dataRefMapRecordId))    // dataMap already contains record with such id
-//                            {
-//                                // just add data referencing it
-//                                if (dataMapRef[dataRefMapRecordId].contains(nextToken))
-//                                    dataMapRef[dataRefMapRecordId][nextToken] += 1;         // update token count
-//                                else
-//                                    dataMapRef[dataRefMapRecordId].insert(nextToken, 1);    // add new record for such token
-//                            }
-//                            else                                            // new unique id found
-//                            {
-//                                // insert first record for id reference to this data map
-//                                dataMapRef.insert(dataRefMapRecordId, {{nextToken, 1}});
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
+                            if (dataMapRef.contains(newTokenDataCortege))    // dataMap already contains record with such id
+                            {
+                                // just add data referencing it
+                                if (dataMapRef[newTokenDataCortege].contains(nextToken))
+                                    dataMapRef[newTokenDataCortege][nextToken] += 1;         // update token count
+                                else
+                                    dataMapRef[newTokenDataCortege].insert(nextToken, 1);    // add new record for such token
+                            }
+                            else                                            // new unique id found
+                            {
+                                // insert first record for id reference to this data map
+                                dataMapRef.insert(newTokenDataCortege, {{nextToken, 1}});
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 private:
-    QString GetMd5Hash(const QList<T>& tokenList)
-    {
-        return QCryptographicHash::hash(
-                    QVariant(tokenList).toByteArray(),
-                    QCryptographicHash::Md5).toHex().toLower();
-    }
-
     int     GetRandomIdx(int indexCount)
     {
         return std::lround(std::ceil(random_.bounded(100.) / 100. * indexCount));
