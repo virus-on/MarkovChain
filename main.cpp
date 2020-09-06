@@ -1,62 +1,34 @@
-#include <QCoreApplication>
-#include <QFile>
-#include <QTextStream>
-#include <QtDebug>
+#include "Dictionary.h"
 
-#include "dict.h"
+#include <iostream>
 
-int main(int argc, char *argv[])
+int main()
 {
-    QCoreApplication a(argc, argv);
-
-    if (argc == 2)
+    std::vector<int> v = {1, 2, 3, 3, 4, 5, 12, 9, 0, 0, 0, 1, 2, 2, 3, 4, 5, 7, 12 };
+    for (const auto& val: v)
     {
-        Dict<QString, 3> dict("", "*END*");
-        QFile inputFile(argv[1]);
-        if (inputFile.open(QIODevice::ReadOnly))
-        {
-           QTextStream in(&inputFile);
-           while (!in.atEnd())
-           {
-              QString line = in.readLine();
-              line.replace(",", " , ");
-              line.replace(".", " . ");
-              QList<QString> data(line.split(" ", QString::SkipEmptyParts));
-              dict.AddData(data);
-           }
-           inputFile.close();
-
-           int windowSize = 3;
-           for (int i = 0; i < 10; i++)
-           {
-               QString currentToken = dict.GetFirstToken();
-               QStringList tokenList {currentToken};
-               try
-               {
-                   while (currentToken != "*END*" && currentToken != "." )
-                   {
-                       QList<QString> windowed;
-                       if (tokenList.length() <= 2)
-                       {
-                           windowed = tokenList;
-                       }
-                       else
-                       {
-                           windowed = tokenList.mid(tokenList.length() - windowSize);
-                       }
-                       currentToken = dict.GetNextToken(windowed);
-                       tokenList.append(currentToken);
-                   }
-               }
-               catch (const std::exception& ex)
-               {
-                   qDebug() << ex.what();
-               }
-               qInfo() << tokenList.join(" ");
-           }
-        }
+        std::cout << val << " ";
     }
-    exit(0);
+    std::cout << std::endl;
 
-    return a.exec();
+    Dictionary<int, 3> d;
+    d.addDataToDictionary<decltype(v)>(v.begin(), v.end(), 3);
+
+    d.printNodes();
+
+    std::vector<const int*> vv;
+    for (int i = 0; i < 5; ++i)
+    {
+        const auto* genVal =  d.getToken<decltype(vv)>(vv.begin(), vv.end(), 2);
+        if (not genVal)
+            break;
+        vv.push_back(genVal);
+    }
+    for (const auto& val: vv)
+    {
+        std::cout << *val << " ";
+    }
+    std::cout << std::endl;
+
+    return 0;
 }

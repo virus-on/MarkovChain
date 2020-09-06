@@ -1,6 +1,6 @@
-QT -= gui
+QT -= gui qt
 
-CONFIG += c++14 qt console
+CONFIG += c++14
 CONFIG -= app_bundle
 
 # The following define makes your compiler emit warnings if you use
@@ -23,4 +23,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    Dictionary.h \
+    Node.h \
     dict.h
