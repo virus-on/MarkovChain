@@ -1,4 +1,4 @@
-QT -= gui qt
+QT -= gui
 
 CONFIG += c++14
 CONFIG -= app_bundle

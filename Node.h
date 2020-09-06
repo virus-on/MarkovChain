@@ -9,7 +9,7 @@ template<typename T>
 struct Node;
 
 template<typename T>
-using NodePtr = Node<T>*;
+using NodePtr = std::unique_ptr<Node<T>>;
 
 template<typename T>
 struct Node
@@ -45,12 +45,12 @@ public:
 
 
 
-    const Node<T>* selectNode(size_t idx)
+    Node<T>* selectNode(size_t idx) const
     {
         return childNodes_.at(idx);
     }
 
-    const Node<T>* selectNodeByWeight(size_t weight)
+    Node<T>* selectNodeByWeight(size_t weight) const
     {
         size_t idx = 0;
         size_t accumulatedWeight = 0;
