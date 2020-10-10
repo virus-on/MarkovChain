@@ -1,4 +1,4 @@
-#include "MarcovChain.h"
+#include "MarkovChain.h"
 
 #include <chrono>
 #include <fstream>
