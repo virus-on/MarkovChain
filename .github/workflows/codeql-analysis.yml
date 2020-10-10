@@ -74,4 +74,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Artifacts
-        path: /home/runner/work/marcovChain/results/cpp-builtin.sarif
+        path: /home/runner/work/markovChain/results/cpp-builtin.sarif
