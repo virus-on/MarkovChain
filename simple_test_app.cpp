@@ -50,6 +50,10 @@ int main(int argc, char *argv[])
                 qInfo() << tokenList.join(" ");
             }
         }
+        else {
+            qCritical() << "Can't open the input file!";
+            exit(0);
+        }
         auto stop = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(stop - start);
         qInfo() << "<<<<<<<<<<<<<<<<<<<<<<<<";
