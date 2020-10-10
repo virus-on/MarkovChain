@@ -1,39 +1,38 @@
 #include "MarcovChain.h"
 
 #include <chrono>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <iterator>
 
-#include <QCoreApplication>
-#include <QFile>
-#include <QTextStream>
-#include <QtDebug>
 
 int main(int argc, char *argv[])
 {
     using namespace std::chrono;
-    QCoreApplication a(argc, argv);
 
     if (argc == 2)
     {
         auto start = high_resolution_clock::now();
-        MarcovChain::Dictionary<QString, 3> dict;
-        QFile inputFile(argv[1]);
-        if (inputFile.open(QIODevice::ReadOnly))
+        MarcovChain::Dictionary<std::string, 3> dict;
+
+        std::ifstream inputFile(argv[1]);
+        if (inputFile.is_open())
         {
-            QTextStream in(&inputFile);
-            while (!in.atEnd())
+            std::string line;
+            while (std::getline(inputFile, line))
             {
-                QString line = in.readLine();
-                line.replace(",", " , ");
-                line.replace(".", " . ");
-                QList<QString> data(line.split(" ", QString::SkipEmptyParts));
-                dict.addDataToDictionary<QList<QString>>(data.begin(), data.end());
+                std::stringstream ss(line);
+                std::istream_iterator<std::string> begin(ss);
+                std::istream_iterator<std::string> end;
+                std::vector<std::string> vstrings(begin, end);
+                dict.addDataToDictionary<decltype(vstrings.begin())>(vstrings.begin(), vstrings.end());
             }
-            inputFile.close();
 
             for (int i = 0; i < 100; ++i)
             {
-                std::list<const QString*> genOutput;
-                const QString* genVal =  nullptr;
+                std::vector<const std::string*> genOutput;
+                const std::string* genVal =  nullptr;
                 do
                 {
                    genVal =  dict.getToken<decltype(genOutput)>(genOutput.begin(), genOutput.end());
@@ -42,24 +41,24 @@ int main(int argc, char *argv[])
                    genOutput.push_back(genVal);
                 } while(genVal);
 
-                QStringList tokenList;
+                std::vector<std::string> tokenList;
 
                 for (const auto& token: genOutput)
                     tokenList.push_back(*token);
 
-                qInfo() << tokenList.join(" ");
+                std::copy(tokenList.begin(), tokenList.end(), std::ostream_iterator<std::string>(std::cout, " "));
+                std::cout << std::endl;
             }
+            auto stop = high_resolution_clock::now();
+            auto duration = duration_cast<milliseconds>(stop - start);
+            std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+            std::cout << "Program Duration: " << duration.count() << "ms" << std::endl;
         }
         else {
-            qCritical() << "Can't open the input file!";
-            exit(0);
+           std::cout << "Can't open the input file!" << std::endl;
         }
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
-        qInfo() << "<<<<<<<<<<<<<<<<<<<<<<<<";
-        qInfo() << "Program Duration:" << duration.count() << "ms";
-    }
-    exit(0);
 
-    return a.exec();
+    }
+
+    return 0;
 }

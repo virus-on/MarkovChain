@@ -133,10 +133,10 @@ namespace MarcovChain {
         }
 
     public:
-        template <typename Container>
-        void addDataToDictionary( typename Container::iterator dataItBegin, typename Container::iterator dataItEnd)
+        template <typename iteratorType>
+        void addDataToDictionary( iteratorType dataItBegin, iteratorType dataItEnd)
         {
-            addDataToDictionary<Container>(dataItBegin, dataItEnd, maxDepth_, false);
+            addDataToDictionary<iteratorType>(dataItBegin, dataItEnd, maxDepth_, false);
         }
 
         template <typename Container>
@@ -218,8 +218,8 @@ namespace MarcovChain {
 #endif
 
     private:
-        template <typename Container>
-        void addDataToDictionary(typename Container::iterator dataItBegin, typename Container::iterator dataItEnd, uint maxDepth, bool inRecursiveCall)
+        template <typename iteratorType>
+        void addDataToDictionary(iteratorType dataItBegin, iteratorType dataItEnd, uint maxDepth, bool inRecursiveCall)
         {
             // if not in recursive call, add or update BEGIN token node
             if (not inRecursiveCall)
@@ -238,7 +238,7 @@ namespace MarcovChain {
                     itrToRawPtr(dictBeginNodeItr)->weight_ += 1;
                 }
 
-                buildNodes<Container>(dictBeginNodeItr, dataItBegin, dataItEnd, maxDepth - 1);
+                buildNodes<iteratorType>(dictBeginNodeItr, dataItBegin, dataItEnd, maxDepth - 1);
             }
 
             // iterate through input values
@@ -268,12 +268,12 @@ namespace MarcovChain {
                 }
 
                 if (not inRecursiveCall)
-                    buildNodes<Container>(dictItr, dataItBegin + 1, dataItEnd, maxDepth - 1);
+                    buildNodes<iteratorType>(dictItr, dataItBegin + 1, dataItEnd, maxDepth - 1);
             } // end building dict
         }
 
-        template <typename Container>
-        void buildNodes(typename decltype(dict_)::const_iterator dictItr, typename Container::iterator dataItBegin, typename Container::iterator dataItEnd, uint maxDepth = maxDepth_)
+        template <typename iteratorType>
+        void buildNodes(typename decltype(dict_)::const_iterator dictItr, iteratorType dataItBegin, iteratorType dataItEnd, uint maxDepth = maxDepth_)
         {
             // increment weight
             __::Node<T>* internalNodeP = itrToRawPtr(dictItr);
@@ -292,7 +292,7 @@ namespace MarcovChain {
                     else
                     {
                         // recursive call to add token's which is not in uniqueTokens_ already
-                        addDataToDictionary<Container>(nextTokenIt, nextTokenIt + 1, maxDepth_, true);
+                        addDataToDictionary<iteratorType>(nextTokenIt, nextTokenIt + 1, maxDepth_, true);
                         tokenDataIt = std::find(uniqueTokens_.begin(), uniqueTokens_.end(), *nextTokenIt);
                         internalNodeP = internalNodeP->tryAdd( cItrValToRawPtr(tokenDataIt) );
                     }
