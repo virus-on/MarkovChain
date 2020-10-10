@@ -8,8 +8,10 @@
 #include <iostream>
 
 
-namespace MarcovChain {
-    namespace __ {
+namespace MarcovChain
+{
+    namespace __
+    {
         template<typename T>
         struct Node;
 
@@ -115,6 +117,9 @@ namespace MarcovChain {
     template <typename T, uint maxDepth_ = 2>
     class Dictionary
     {
+    public:
+        using output_value_type = const T*;
+
     private:
         static constexpr uint maxWindowSize_ = maxDepth_ - 1;
 
@@ -146,7 +151,7 @@ namespace MarcovChain {
         }
 
         template <typename Container, uint windowSize = maxWindowSize_>
-        const typename Container::value_type getToken(typename Container::iterator tokenItBegin, typename Container::iterator tokenItEnd)
+        output_value_type getToken(typename Container::iterator tokenItBegin, typename Container::iterator tokenItEnd)
         {
             static_assert (maxWindowSize_ >= windowSize, "Depth can't be greater then maximum depth value");
             if ( windowSize == 0 || tokenItBegin == tokenItEnd )
