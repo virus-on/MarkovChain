@@ -16,7 +16,8 @@ int main(int argc, char *argv[])
         auto start = high_resolution_clock::now();
         // Init Dictionary with maximum depth 3
         // This includes sequence start token, which will be the root for all tokens
-        MarcovChain::Dictionary<std::string, 3> dict;
+        MarcovChain::Dictionary<std::string, 3, MarcovChain::StorageStrategy::Hash> dict; // in this test MarcovChain::StorageStrategy::Hash is faster by 25 ms in avarage on my setup
+        // MarcovChain::StorageStrategy says what to use as a unique token storage - std::set or std::unordered_set
 
         // Read file line by line
         std::ifstream inputFile(argv[1]);

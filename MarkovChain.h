@@ -2,10 +2,12 @@
 
 #include <vector>
 #include <set>
+#include <unordered_set>
 #include <algorithm>
 #include <memory>
 #include <random>
 #include <iostream>
+#include <type_traits>
 
 
 namespace MarcovChain
@@ -114,16 +116,22 @@ namespace MarcovChain
         };
     }
 
-    template <typename T, uint maxDepth_ = 2>
+    enum class StorageStrategy {
+        Compare,
+        Hash
+    };
+
+    template <typename T, uint maxDepth_ = 2, StorageStrategy strategy_ = StorageStrategy::Compare >
     class Dictionary
     {
+        using storage_type = typename std::conditional<strategy_ == StorageStrategy::Compare, std::set<T>, std::unordered_set<T>>::type;
     public:
         using output_value_type = const T*;
 
     private:
         static constexpr uint maxWindowSize_ = maxDepth_ - 1;
 
-        std::set<T> uniqueTokens_;
+        storage_type uniqueTokens_;
         std::vector<__::NodePtr<T>> dict_;
 
         std::random_device rd_;
